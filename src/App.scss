@@ -1,0 +1,22 @@
+.show {
+  display: block;
+}
+.hidden {
+  display: none;
+}
+
+.modal-title {
+  text-transform: capitalize;
+}
+
+.modal-footer {
+  border: none;
+}
+
+input[required] + label {
+  &::after {
+    content: "*";
+    margin-left: 0.2rem;
+    color: red;
+  }
+}

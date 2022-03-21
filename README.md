@@ -2,6 +2,20 @@
 
 ## A.Core
 
+### Main Concept
+
+- [x] JSX
+- [x] Rendering
+- [x] Component & Props
+- [x] State & Lifecycle
+- [x] Event Handlers
+- [x] Conditional Rendering
+- [x] Lists & Keys
+- [x] Forms
+- [x] Lifting State Up
+- [x] Composition
+- [x] Thinking In React
+
 ## B. Built-in Tools
 
 ...

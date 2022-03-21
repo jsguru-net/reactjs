@@ -1,0 +1,39 @@
+/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css2?family=Material+Icons");
+@import "bootstrap/scss/bootstrap";
+
+body {
+  font-size: 14px;
+}
+
+[data-colname="action"] {
+  width: 240px;
+}
+
+.table thead {
+  td,
+  th {
+    font-weight: bold;
+  }
+}
+.table > :not(:first-child) {
+  border-top: none;
+}
+
+.btn-icon {
+  border: none;
+  background: none;
+  opacity: 0.8;
+  &:hover {
+    opacity: 1;
+  }
+  .icon {
+    font-size: 1.2rem;
+    &-warning {
+      color: $warning;
+    }
+    &-danger {
+      color: $danger;
+    }
+  }
+}
