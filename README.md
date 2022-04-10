@@ -16,6 +16,10 @@
 - [x] Composition
 - [x] Thinking In React
 
+```bash
+yarn add -D @babel/preset-env @babel/preset-react @testing-library/jest-dom @testing-library/react
+```
+
 ## B. Built-in Tools
 
 ...
