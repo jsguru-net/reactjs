@@ -7,22 +7,27 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
-} from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchBookmark, selectBookmarkList, selectStatus } from "./bookmarkSlice";
+} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchBookmark,
+  selectBookmarkList,
+  selectStatus,
+} from './bookmarkSlice';
 
-const BookmarkManager = () => {
-  const [state, setState] = useState({
-    isReady: false,
-    items: [],
-    currentPage: 0,
-    totalPage: 0,
-  });
+const BookmarkManagerExample = () => {
   const dispatch = useDispatch();
   const bookmarkList = useSelector(selectBookmarkList);
   const status = useSelector(selectStatus);
 
   const bookmarkFormEle = useRef(null);
+
+  useMemo(() => {
+    if (!bookmarkList) {
+      console.log('preload data');
+      dispatch(fetchBookmark());
+    }
+  }, [bookmarkList]);
 
   const addNewBookmark = (e) => {
     e.preventDefault();
@@ -86,8 +91,9 @@ const BookmarkManager = () => {
 
   useEffect(() => {
     console.log('Component DidMount, componentDidUpdate : only once');
-    if(!bookmarkList){ // null
-      dispatch(fetchBookmark());
+    if (!bookmarkList) {
+      // null
+      //dispatch(fetchBookmark());
     }
     // componentDidMount, componentDidUpdate
     // console.log("BookmarkManager componentDidMount, componentDidUpdate");
@@ -104,15 +110,15 @@ const BookmarkManager = () => {
 
     // componentWillUnmount
     return () => {
-      console.log("BookmarkManager componentWillUnmount");
+      console.log('BookmarkManager componentWillUnmount');
       // clearInterval(intervalId);
     };
   });
 
   useLayoutEffect(() => {
-    window.addEventListener("scroll", infiniteScroll, { passive: true });
+    window.addEventListener('scroll', infiniteScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", infiniteScroll, { passive: true });
+      window.removeEventListener('scroll', infiniteScroll, { passive: true });
     };
   });
 
@@ -121,29 +127,36 @@ const BookmarkManager = () => {
       <div className="row">
         <h1>Bookmark Manager</h1>
         <p>Status: {status}</p>
-        {bookmarkList ? (<>
-        <p>
-          {bookmarkList.page}/{bookmarkList.totalPage}
-        </p>
-        <div className="cta d-flex justify-content-end">
-          <button
-            className="btn btn-primary"
-            onClick={(e) => addNewBookmark(e)}
-          >
-            Add new bookmark
-          </button>
-        </div>
-        <BookmarkForm ref={bookmarkFormEle} />
-        <BookmarkList itemJSON={JSON.stringify(bookmarkList.items)}></BookmarkList>
-        </>) : '' }
+        {bookmarkList ? JSON.stringify(bookmarkList.items) : ''}
+        {/* {bookmarkList ? (
+          <>
+            <p>
+              {bookmarkList.page}/{bookmarkList.totalPage}
+            </p>
+            <div className="cta d-flex justify-content-end">
+              <button
+                className="btn btn-primary"
+                onClick={(e) => addNewBookmark(e)}
+              >
+                Add new bookmark
+              </button>
+            </div>
+            <BookmarkForm ref={bookmarkFormEle} />
+            <BookmarkList
+              itemJSON={JSON.stringify(bookmarkList.items)}
+            ></BookmarkList>
+          </>
+        ) : (
+          ''
+        )} */}
       </div>
     </div>
   );
 };
 
-const BookmarkList = React.memo(({ itemJSON }) => {
-  console.log("list render");
-  const items = JSON.parse(itemJSON);
+const BookmarkList = React.memo(({ items }) => {
+  console.log('list render', items);
+
   return (
     <table className="table table-striped">
       <thead>
@@ -203,7 +216,7 @@ const BookmarkRow = (props) => {
 };
 
 const BookmarkForm = forwardRef((props, ref) => {
-  const [state, setState] = useState({ mode: "add", open: false });
+  const [state, setState] = useState({ mode: 'add', open: false });
   const _closeModal = () => {
     setState({ ...state, open: false });
   };
@@ -227,22 +240,22 @@ const BookmarkForm = forwardRef((props, ref) => {
   });
 
   useLayoutEffect(() => {
-    console.log("BookmarkForm");
-    document.addEventListener("keydown", escFunction, false);
+    console.log('BookmarkForm');
+    document.addEventListener('keydown', escFunction, false);
     // console.log(
     //   "BookmarkForm: componentDidMount | componentDidUpdate | componentWillUnmount "
     // );
     return () => {
-      document.removeEventListener("keydown", escFunction, false);
+      document.removeEventListener('keydown', escFunction, false);
     };
   });
 
   const { open } = state;
   return (
     <div
-      className={open ? "modal fade show" : "modal fade"}
+      className={open ? 'modal fade show' : 'modal fade'}
       id="exampleModal"
-      tabIndex={"-1"}
+      tabIndex={'-1'}
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
     >
@@ -306,5 +319,52 @@ const BookmarkForm = forwardRef((props, ref) => {
     </div>
   );
 });
+
+const loadMore = (e, dispatch, page) => {
+  e.preventDefault();
+  dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+};
+
+const BookmarkManager = () => {
+  const bookmarkList = useSelector(selectBookmarkList);
+  const dispatch = useDispatch();
+
+  const items = bookmarkList?.items || [];
+  const page = bookmarkList?.page || 1;
+
+  useEffect(() => {
+    console.log('BookmarkManager component did mounted/updated');
+    if (!bookmarkList) {
+      // first load
+      dispatch(fetchBookmark({ page: 1, itemsPerPage: 5 }));
+    }
+    // componentWillUnmount
+    return () => {
+      console.log('BookmarkManager componentWillUnmount');
+      // clearInterval(intervalId);
+    };
+  });
+  return (
+    <>
+      <div className="container">
+        <div className="row">
+          <h1>Bookmark Manager</h1>
+          <p>
+            {page}/{bookmarkList?.totalPage}
+          </p>
+          <BookmarkList items={items}></BookmarkList>
+          <div className="cta d-flex justify-content-end">
+            <button
+              className="btn btn-primary"
+              onClick={(e) => loadMore(e, dispatch, page)}
+            >
+              Load more
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default BookmarkManager;
