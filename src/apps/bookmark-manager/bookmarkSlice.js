@@ -29,7 +29,14 @@ export const bookmarkSlice = createSlice({
       })
       .addCase(fetchBookmark.fulfilled, (state, action) => {
         state.status = 'idle';
-        state.bookmarkList = action.payload;
+        if (state.bookmarkList && state.bookmarkList.items) {
+          state.bookmarkList.items.push(...action.payload.items);
+          state.bookmarkList.page = action.payload.page;
+          state.bookmarkList.itemsPerPage = action.payload.itemsPerPage;
+          state.bookmarkList.totalPage = action.payload.totalPage;
+        } else {
+          state.bookmarkList = action.payload;
+        }
       });
   },
 });

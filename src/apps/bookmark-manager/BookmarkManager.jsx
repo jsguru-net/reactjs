@@ -331,12 +331,20 @@ const BookmarkManager = () => {
 
   const items = bookmarkList?.items || [];
   const page = bookmarkList?.page || 1;
+  const totalPage = bookmarkList?.totalPage || 0;
 
   useEffect(() => {
     console.log('BookmarkManager component did mounted/updated');
     if (!bookmarkList) {
+      console.log('first load');
       // first load
       dispatch(fetchBookmark({ page: 1, itemsPerPage: 5 }));
+    } else {
+      const { scrollTop, scrollHeight, clientHeight } =
+        document.documentElement;
+      if (scrollHeight === clientHeight) {
+        dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+      }
     }
     // componentWillUnmount
     return () => {
@@ -344,14 +352,33 @@ const BookmarkManager = () => {
       // clearInterval(intervalId);
     };
   });
+
+  const infiniteScroll = useCallback(() => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+    if (scrollTop + clientHeight >= scrollHeight - 5 && page < totalPage) {
+      dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+    }
+  });
+
+  useLayoutEffect(() => {
+    window.addEventListener('scroll', infiniteScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', infiniteScroll, { passive: true });
+    };
+  });
   return (
     <>
       <div className="container">
         <div className="row">
           <h1>Bookmark Manager</h1>
-          <p>
-            {page}/{bookmarkList?.totalPage}
-          </p>
+          {bookmarkList && bookmarkList.totalPage ? (
+            <p>
+              {page}/{bookmarkList?.totalPage}
+            </p>
+          ) : (
+            ''
+          )}
           <BookmarkList items={items}></BookmarkList>
           <div className="cta d-flex justify-content-end">
             <button
