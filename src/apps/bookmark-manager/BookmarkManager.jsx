@@ -8,6 +8,8 @@ import React, {
   useImperativeHandle,
   useCallback,
 } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBookmark, selectBookmarkList, selectStatus } from "./bookmarkSlice";
 
 const BookmarkManager = () => {
   const [state, setState] = useState({
@@ -16,6 +18,10 @@ const BookmarkManager = () => {
     currentPage: 0,
     totalPage: 0,
   });
+  const dispatch = useDispatch();
+  const bookmarkList = useSelector(selectBookmarkList);
+  const status = useSelector(selectStatus);
+
   const bookmarkFormEle = useRef(null);
 
   const addNewBookmark = (e) => {
@@ -23,40 +29,40 @@ const BookmarkManager = () => {
     bookmarkFormEle.current.openModal();
   };
 
-  const loadItems = (page = 1) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const items = [
-          {
-            title: "Google" + Math.floor(Math.random() * 10),
-            link: "https://google.com",
-            group: "Business",
-          },
-          {
-            title: "Facebook",
-            link: "https://facebook.com",
-            group: "Business",
-          },
-          { title: "Youtube", link: "https://youtube.com", group: "Business" },
-          {
-            title: "JSBaseVietnam",
-            link: "https://jsbasevietnam.com",
-            group: "Technical",
-          },
-          {
-            title: "NextJSVietnam",
-            link: "https://nextjsvietnam.com",
-            group: "Technical",
-          },
-        ];
-        resolve({
-          totalPage: 10,
-          currentPage: page,
-          items,
-        });
-      }, 1000);
-    });
-  };
+  // const loadItems = (page = 1) => {
+  //   return new Promise((resolve) => {
+  //     setTimeout(() => {
+  //       const items = [
+  //         {
+  //           title: "Google" + Math.floor(Math.random() * 10),
+  //           link: "https://google.com",
+  //           group: "Business",
+  //         },
+  //         {
+  //           title: "Facebook",
+  //           link: "https://facebook.com",
+  //           group: "Business",
+  //         },
+  //         { title: "Youtube", link: "https://youtube.com", group: "Business" },
+  //         {
+  //           title: "JSBaseVietnam",
+  //           link: "https://jsbasevietnam.com",
+  //           group: "Technical",
+  //         },
+  //         {
+  //           title: "NextJSVietnam",
+  //           link: "https://nextjsvietnam.com",
+  //           group: "Technical",
+  //         },
+  //       ];
+  //       resolve({
+  //         totalPage: 10,
+  //         currentPage: page,
+  //         items,
+  //       });
+  //     }, 1000);
+  //   });
+  // };
 
   const infiniteScroll = useCallback(() => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
@@ -65,54 +71,40 @@ const BookmarkManager = () => {
       scrollTop + clientHeight >= scrollHeight - 5 &&
       state.currentPage < state.totalPage
     ) {
-      loadItems(state.currentPage + 1).then((res) => {
-        const { totalPage, currentPage, items } = res;
-        setState({
-          ...state,
-          ready: true,
-          totalPage,
-          currentPage,
-          items: [...state.items, ...items],
-        });
-      });
+      // loadItems(state.currentPage + 1).then((res) => {
+      //   const { totalPage, currentPage, items } = res;
+      //   setState({
+      //     ...state,
+      //     ready: true,
+      //     totalPage,
+      //     currentPage,
+      //     items: [...state.items, ...items],
+      //   });
+      // });
     }
   });
 
   useEffect(() => {
-    // componentDidMount, componentDidUpdate
-    console.error("BookmarkManager componentDidMount, componentDidUpdate");
-    if (!state.ready) {
-      loadItems(1).then((res) => {
-        const { totalPage, currentPage, items } = res;
-        setState({
-          ...state,
-          ready: true,
-          totalPage,
-          currentPage,
-          items,
-        });
-      });
-    } else {
-      const { scrollTop, scrollHeight, clientHeight } =
-        document.documentElement;
-
-      if (scrollHeight === clientHeight) {
-        loadItems(state.currentPage + 1).then((res) => {
-          const { totalPage, currentPage, items } = res;
-          setState({
-            ...state,
-            ready: true,
-            totalPage,
-            currentPage,
-            items: [...state.items, ...items],
-          });
-        });
-      }
+    console.log('Component DidMount, componentDidUpdate : only once');
+    if(!bookmarkList){ // null
+      dispatch(fetchBookmark());
     }
+    // componentDidMount, componentDidUpdate
+    // console.log("BookmarkManager componentDidMount, componentDidUpdate");
+    // if (!state.ready) {
+
+    // } else {
+    //   const { scrollTop, scrollHeight, clientHeight } =
+    //     document.documentElement;
+
+    //   if (scrollHeight === clientHeight) {
+
+    //   }
+    // }
 
     // componentWillUnmount
     return () => {
-      console.error("BookmarkManager componentWillUnmount");
+      console.log("BookmarkManager componentWillUnmount");
       // clearInterval(intervalId);
     };
   });
@@ -122,14 +114,16 @@ const BookmarkManager = () => {
     return () => {
       window.removeEventListener("scroll", infiniteScroll, { passive: true });
     };
-  }, [state.items]);
+  });
 
   return (
     <div className="container">
       <div className="row">
         <h1>Bookmark Manager</h1>
+        <p>Status: {status}</p>
+        {bookmarkList ? (<>
         <p>
-          {state.currentPage}/{state.totalPage}
+          {bookmarkList.page}/{bookmarkList.totalPage}
         </p>
         <div className="cta d-flex justify-content-end">
           <button
@@ -140,14 +134,15 @@ const BookmarkManager = () => {
           </button>
         </div>
         <BookmarkForm ref={bookmarkFormEle} />
-        <BookmarkList itemJSON={JSON.stringify(state.items)}></BookmarkList>
+        <BookmarkList itemJSON={JSON.stringify(bookmarkList.items)}></BookmarkList>
+        </>) : '' }
       </div>
     </div>
   );
 };
 
 const BookmarkList = React.memo(({ itemJSON }) => {
-  console.error("list render");
+  console.log("list render");
   const items = JSON.parse(itemJSON);
   return (
     <table className="table table-striped">
@@ -180,7 +175,7 @@ const BookmarkList = React.memo(({ itemJSON }) => {
 const BookmarkRow = (props) => {
   const { bookmark } = props;
   useEffect(() => {
-    // console.error(
+    // console.log(
     //   "BookmarkRow: componentDidMount | componentDidUpdate | componentWillUnmount "
     // );
   });
@@ -232,9 +227,9 @@ const BookmarkForm = forwardRef((props, ref) => {
   });
 
   useLayoutEffect(() => {
-    console.error("BookmarkForm");
+    console.log("BookmarkForm");
     document.addEventListener("keydown", escFunction, false);
-    // console.error(
+    // console.log(
     //   "BookmarkForm: componentDidMount | componentDidUpdate | componentWillUnmount "
     // );
     return () => {
