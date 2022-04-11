@@ -322,7 +322,14 @@ const BookmarkForm = forwardRef((props, ref) => {
 
 const loadMore = (e, dispatch, page) => {
   e.preventDefault();
-  dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+  // dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+  dispatch({
+    type: 'HELLO_SAGA',
+    payload: {
+      page: page + 1,
+      itemsPerPage: 5,
+    },
+  });
 };
 
 const BookmarkManager = () => {
@@ -338,12 +345,26 @@ const BookmarkManager = () => {
     if (!bookmarkList) {
       console.log('first load');
       // first load
-      dispatch(fetchBookmark({ page: 1, itemsPerPage: 5 }));
+      // dispatch(fetchBookmark({ page: 1, itemsPerPage: 5 }));
+      dispatch({
+        type: 'HELLO_SAGA',
+        payload: {
+          page: 1,
+          itemsPerPage: 5,
+        },
+      });
     } else {
       const { scrollTop, scrollHeight, clientHeight } =
         document.documentElement;
       if (scrollHeight === clientHeight) {
-        dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+        // dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+        dispatch({
+          type: 'HELLO_SAGA',
+          payload: {
+            page: page + 1,
+            itemsPerPage: 5,
+          },
+        });
       }
     }
     // componentWillUnmount
@@ -357,7 +378,14 @@ const BookmarkManager = () => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
     if (scrollTop + clientHeight >= scrollHeight - 5 && page < totalPage) {
-      dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+      // dispatch(fetchBookmark({ page: page + 1, itemsPerPage: 5 }));
+      dispatch({
+        type: 'HELLO_SAGA',
+        payload: {
+          page: page + 1,
+          itemsPerPage: 5,
+        },
+      });
     }
   });
 
