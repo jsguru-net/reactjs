@@ -15,6 +15,8 @@ import {
   selectStatus,
 } from './bookmarkSlice';
 
+import BookmarkService from './bookmark.service';
+
 const BookmarkManagerExample = () => {
   const dispatch = useDispatch();
   const bookmarkList = useSelector(selectBookmarkList);
@@ -409,6 +411,15 @@ const BookmarkManager = () => {
           )}
           <BookmarkList items={items}></BookmarkList>
           <div className="cta d-flex justify-content-end">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                BookmarkService.dispatchAction('ABC', { value: 1 });
+                console.error(BookmarkService.getState('bookmark'));
+              }}
+            >
+              Test
+            </button>
             <button
               className="btn btn-primary"
               onClick={(e) => loadMore(e, dispatch, page)}
