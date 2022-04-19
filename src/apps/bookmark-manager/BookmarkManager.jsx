@@ -15,6 +15,8 @@ import {
   selectStatus,
 } from './bookmarkSlice';
 
+import DOMPurify from "dompurify";
+
 const BookmarkManagerExample = () => {
   const dispatch = useDispatch();
   const bookmarkList = useSelector(selectBookmarkList);
@@ -192,15 +194,26 @@ const BookmarkRow = (props) => {
     //   "BookmarkRow: componentDidMount | componentDidUpdate | componentWillUnmount "
     // );
   });
+  const xssAttackSample = `
+  <h1>XSS Example</h1>
+  <a href="javascript:alert(1)">Open Link</a>  
+  `;
+  const cleanHTML = DOMPurify.sanitize(xssAttackSample, {
+    USE_PROFILES: { html: true },
+  });
   return (
     <tr>
       <td scope="row">{bookmark.title}</td>
       <td scope="row">
-        <a target="_blank" href="{{ bookmark.toObject().link }}">
+        <a target="_blank" href={ bookmark.link }>
           {bookmark.link}
         </a>
       </td>
-      <td scope="row">{bookmark.group}</td>
+      <td scope="row">
+        {bookmark.group}
+        {/* <div dangerouslySetInnerHTML={{ __html: xssAttackSample }} />; */}
+        <div dangerouslySetInnerHTML={{__html: cleanHTML}}></div>
+      </td>
       <td scope="row" data-colname="action">
         <div>
           <button className="btn-icon" title="Edit">
